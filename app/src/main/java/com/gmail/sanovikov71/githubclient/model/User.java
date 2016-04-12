@@ -5,7 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
-    public User(String login, String avatarUrl) {
+    public User(int id, String login, String avatarUrl) {
+        this.id = id;
         this.login = login;
         this.avatarUrl = avatarUrl;
     }

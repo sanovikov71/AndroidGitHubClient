@@ -1,14 +1,15 @@
+
 package com.gmail.sanovikov71.githubclient.ui;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -20,7 +21,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.gmail.sanovikov71.githubclient.R;
@@ -28,16 +28,16 @@ import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
+import com.gmail.sanovikov71.githubclient.ui.drawer.RecentsFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 
 public class MainActivity extends AppCompatActivity
         implements UiElement,
-        NavigationView.OnNavigationItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor>,
-ScrollingUi{
+        ScrollingUi, OnUserListClickListener {
 
     public static final String TAG = "Novikov";
 
@@ -59,9 +59,6 @@ ScrollingUi{
         mGithubUserAdapter = new GithubUserAdapter(this);
         githubUsersList.setAdapter(mGithubUserAdapter);
         githubUsersList.addOnScrollListener(new EndlessScrollListener(this, layoutManager));
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
         mRefreshView = (SwipeRefreshLayout) findViewById(R.id.list_refresh);
         mRefreshView.setOnRefreshListener(this);
@@ -111,11 +108,13 @@ ScrollingUi{
         List<User> users = new ArrayList<>();
         if (data != null && data.moveToFirst()) {
             do {
+                int id =
+                        data.getInt(data.getColumnIndex(UserEntry.COLUMN_ID));
                 String login =
                         data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
                 String avatarUrl = data.getString(
                         data.getColumnIndex(UserEntry.COLUMN_AVATAR_URL));
-                User user = new User(login, avatarUrl);
+                User user = new User(id, login, avatarUrl);
                 users.add(user);
             } while (data.moveToNext());
         }
@@ -137,31 +136,6 @@ ScrollingUi{
         } else {
             super.onBackPressed();
         }
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override
@@ -192,4 +166,43 @@ ScrollingUi{
     public void loadMore() {
         mDataService.fetchMoreUsers(this, mNumberOfLoadedEntries);
     }
+
+    @Override
+    public void onClickUser(int userId) {
+        updateRecentsStorage(userId);
+    }
+
+    private void updateRecentsStorage(int newRecentUserId) {
+
+        final String newRecentId = String.valueOf(newRecentUserId);
+
+        SharedPreferences recents =
+                getSharedPreferences(RecentsFragment.RECENT_LIST_PREFERENCES_NAME, MODE_PRIVATE);
+
+        // format: 1;7;8;3;12;
+        String recentsStr = recents.getString(RecentsFragment.KEY_RECENTS, "");
+
+        List<String> recentList = RecentsFragment.getRecentUsers(recentsStr);
+
+        if (newRecentId.equals(recentList.get(0))) {
+            return;
+        }
+
+        int indexOf = recentList.indexOf(newRecentId);
+        if (-1 != indexOf) {
+            recentList.remove(indexOf);
+        } else {
+            recentList.remove(recentList.size() - 1);
+        }
+        recentList.add(0, newRecentId);
+
+        // save changes
+        StringBuilder newRecentsStrBuilder = new StringBuilder();
+        for (int i = 0; i < recentList.size(); i++) {
+            newRecentsStrBuilder.append(recentList.get(i)).append(RecentsFragment.RECENT_SEPARATOR);
+        }
+        recents.edit().putString(RecentsFragment.KEY_RECENTS, newRecentsStrBuilder.toString()).apply();
+
+    }
+
 }
