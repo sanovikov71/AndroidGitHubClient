@@ -1,5 +1,5 @@
 
-package com.gmail.sanovikov71.githubclient.ui.drawer;
+package com.gmail.sanovikov71.githubclient.ui.drawer.recent;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -13,12 +13,12 @@ import com.gmail.sanovikov71.githubclient.R;
 import java.util.ArrayList;
 import java.util.List;
 
-class DrawerRecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
     private List<String> mLogins = new ArrayList<>();
 
-    public DrawerRecentListAdapter(Context context) {
+    public RecentListAdapter(Context context) {
         mContext = context;
     }
 
@@ -30,7 +30,7 @@ class DrawerRecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_drawer, parent, false);
+                .inflate(R.layout.item_recent, parent, false);
         return new ViewHolder(view);
     }
 

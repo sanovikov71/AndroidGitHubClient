@@ -13,11 +13,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <fragment
-        android:id="@+id/drawer_fragment"
-        android:name="com.gmail.sanovikov71.githubclient.ui.drawer.RecentsFragment"
+    <RelativeLayout
         android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"/>
+        android:layout_gravity="start">
+
+        <FrameLayout
+            android:id="@+id/recents_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:layout_alignParentTop="true"
+            tools:layout="@layout/fragment_recents"/>
+
+        <fragment
+            android:id="@+id/search_fragment"
+            android:name="com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/recents_fragment_container"
+            tools:layout="@layout/fragment_search"/>
+
+    </RelativeLayout>
 
 </android.support.v4.widget.DrawerLayout>

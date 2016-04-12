@@ -12,6 +12,7 @@ import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.network.RetrofitService;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 import com.gmail.sanovikov71.githubclient.ui.UiElement;
+import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,11 +21,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DataService extends Service {
 
     private static final String API_URL = "https://api.github.com/";
+    private static final String TAG = "Novikov";
 
     private RetrofitService mGithub;
 
@@ -37,16 +38,16 @@ public class DataService extends Service {
         mGithub = retrofit.create(RetrofitService.class);
     }
 
-//    public static final String ACTION_FETCH = "com.gmail.sanovikov71.githubclient.ACTION_FETCH";
+    //    public static final String ACTION_FETCH = "com.gmail.sanovikov71.githubclient.ACTION_FETCH";
 
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        if (ACTION_FETCH.equals(intent.getAction())) {
-//            fetchUsers();
-//        }
-//
-//        return START_NOT_STICKY;
-//    }
+    //    @Override
+    //    public int onStartCommand(Intent intent, int flags, int startId) {
+    //        if (ACTION_FETCH.equals(intent.getAction())) {
+    //            fetchUsers();
+    //        }
+    //
+    //        return START_NOT_STICKY;
+    //    }
 
     public void fetchUsers(final UiElement ui) {
         fetch(ui, 0);
@@ -58,43 +59,66 @@ public class DataService extends Service {
     }
 
     public void fetch(final UiElement ui, int since) {
-        System.out.println("Novikov fetch");
         Log.i("Novikov", "fetch");
         mGithub.fetchUsers(since).enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                System.out.println("Novikov onResponse");
                 ui.hideProgressDialog();
 
                 final List<User> body = response.body();
                 if (response.isSuccessful()) {
-                    System.out.println("Novikov good");
+                    final int size = body.size();
+                    ContentValues userList[] = new ContentValues[size];
+                    for (int i = 0; i < size; i++) {
+                        ContentValues userValues = new ContentValues();
+                        final User user = body.get(i);
+                        userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
+                        userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
+                        userList[i] = userValues;
+                    }
+
+                    getContentResolver()
+                            .bulkInsert(UserEntry.CONTENT_URI, userList);
                 } else {
-                    System.out.println("Novikov bad");
                     ui.showError(response.code());
                 }
-
-                final int size = body.size();
-                ContentValues userList[] = new ContentValues[size];
-                for (int i = 0; i < size; i++) {
-                    ContentValues cardValues = new ContentValues();
-                    final User user = body.get(i);
-                    cardValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
-                    cardValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
-                    userList[i] = cardValues;
-                }
-
-                getContentResolver()
-                        .bulkInsert(UserEntry.CONTENT_URI, userList);
             }
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
-                System.out.println("Novikov onFailure");
                 ui.hideProgressDialog();
                 ui.showError(-1);
             }
         });
+    }
+
+    public void fetchUser(final ServerSearchListener serverSearchListener, String login) {
+        mGithub.fetchUser(login).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                final User user = response.body();
+                if (response.isSuccessful()) {
+                    ContentValues userValues = new ContentValues();
+                    userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
+                    userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
+
+                    getContentResolver()
+                            .insert(UserEntry.CONTENT_URI, userValues);
+
+                    serverSearchListener.onSearchResult();
+                } else {
+                    serverSearchListener.onSearchError(response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.i(TAG, "url: " + call.request().url().toString());
+                Log.i(TAG, "failure reason: " + t.toString());
+                serverSearchListener.onSearchError(-1);
+            }
+        });
+
     }
 
     // Just boilerplate as always in android

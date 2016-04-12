@@ -1,5 +1,5 @@
 
-package com.gmail.sanovikov71.githubclient.ui.drawer;
+package com.gmail.sanovikov71.githubclient.ui.drawer.recent;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -32,7 +32,7 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
     private static final String TAG = "Novikov";
 
     private List<String> mRecentIds = new ArrayList<>();
-    private DrawerRecentListAdapter mDrawerListAdapter;
+    private RecentListAdapter mRecentsAdapter;
 
     public static final String RECENT_LIST_PREFERENCES_NAME = "recents";
     public static final String KEY_RECENTS = "recents";
@@ -50,14 +50,14 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_nav_drawer, container, false);
+        View view = inflater.inflate(R.layout.fragment_recents, container, false);
 
-        RecyclerView drawerList = (RecyclerView) view.findViewById(R.id.drawer_list);
+        RecyclerView recentsList = (RecyclerView) view.findViewById(R.id.recents_list);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        drawerList.setLayoutManager(layoutManager);
+        recentsList.setLayoutManager(layoutManager);
 
-        mDrawerListAdapter = new DrawerRecentListAdapter(getActivity());
-        drawerList.setAdapter(mDrawerListAdapter);
+        mRecentsAdapter = new RecentListAdapter(getActivity());
+        recentsList.setAdapter(mRecentsAdapter);
 
         return view;
     }
@@ -93,8 +93,8 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String sortOrder = GithubDataContract.UserEntry.COLUMN_ID + " ASC";
-        Uri cardUri = GithubDataContract.UserEntry.CONTENT_URI;
-        return new CursorLoader(getActivity(), cardUri, DBConstants.USER_COLUMNS, null, null, sortOrder);
+        Uri uri = GithubDataContract.UserEntry.CONTENT_URI;
+        return new CursorLoader(getActivity(), uri, DBConstants.USER_COLUMNS, null, null, sortOrder);
     }
 
     @Override
@@ -114,7 +114,9 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
             }
         }
         Log.i(TAG, "updateDataset: " + logins.size());
-        mDrawerListAdapter.updateDataset(logins);
+        if (mRecentsAdapter != null) {
+            mRecentsAdapter.updateDataset(logins);
+        }
     }
 
     @Override

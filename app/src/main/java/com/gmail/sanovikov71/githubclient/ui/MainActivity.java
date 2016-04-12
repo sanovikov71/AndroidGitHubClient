@@ -1,4 +1,3 @@
-
 package com.gmail.sanovikov71.githubclient.ui;
 
 import android.content.ComponentName;
@@ -10,6 +9,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -21,6 +22,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.gmail.sanovikov71.githubclient.R;
@@ -28,19 +31,22 @@ import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
-import com.gmail.sanovikov71.githubclient.ui.drawer.RecentsFragment;
+import com.gmail.sanovikov71.githubclient.ui.drawer.recent.RecentsFragment;
+import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchStateListener;
+import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements UiElement,
         SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor>,
-        ScrollingUi, OnUserListClickListener {
+        ScrollingUi, OnUserListClickListener, SearchStateListener, ServerSearchListener {
 
     public static final String TAG = "Novikov";
+    private static final String TAG_RECENTS_FRAGMENT = "TAG_RECENTS_FRAGMENT";
 
+    private FrameLayout mRecentContainer;
     private GithubUserAdapter mGithubUserAdapter;
     private SwipeRefreshLayout mRefreshView;
     private int mNumberOfLoadedEntries = 0;
@@ -63,8 +69,12 @@ public class MainActivity extends AppCompatActivity
         mRefreshView = (SwipeRefreshLayout) findViewById(R.id.list_refresh);
         mRefreshView.setOnRefreshListener(this);
 
+        mRecentContainer = (FrameLayout) findViewById(R.id.recents_fragment_container);
+
         // TODO: change loader id
         getSupportLoaderManager().initLoader(200, null, this);
+
+        showRecentsFragment();
     }
 
     private DataService mDataService;
@@ -203,6 +213,48 @@ public class MainActivity extends AppCompatActivity
         }
         recents.edit().putString(RecentsFragment.KEY_RECENTS, newRecentsStrBuilder.toString()).apply();
 
+    }
+
+    @Override
+    public void onSearchResultShown() {
+        hideRecentsFragment();
+    }
+
+    @Override
+    public void onNoSearchResults() {
+        showRecentsFragment();
+    }
+
+    // TODO: transaction is actually unnecessary here
+    private void showRecentsFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.recents_fragment_container, new RecentsFragment(), TAG_RECENTS_FRAGMENT)
+                .commit();
+        mRecentContainer.setVisibility(View.VISIBLE);
+    }
+
+    // TODO: transaction is actually unnecessary here
+    private void hideRecentsFragment() {
+        final FragmentManager supportFragmentManager = getSupportFragmentManager();
+        Fragment recentsFragment = supportFragmentManager.findFragmentByTag(TAG_RECENTS_FRAGMENT);
+        supportFragmentManager.beginTransaction().remove(recentsFragment).commit();
+        mRecentContainer.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onSearch(String query) {
+        mDataService.fetchUser(this, query);
+    }
+
+    @Override
+    public void onSearchResult() {
+
+    }
+
+    @Override
+    public void onSearchError(int stringId) {
+        Toast.makeText(this, "Server error: " + stringId, Toast.LENGTH_LONG).show();
     }
 
 }
