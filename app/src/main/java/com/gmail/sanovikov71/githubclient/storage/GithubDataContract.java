@@ -29,4 +29,26 @@ public class GithubDataContract {
         public static final String COLUMN_AVATAR_URL = "avatar_url";
 
     }
+
+    public static final String PATH_REPOS = "repos";
+
+    public static final class RepoEntry implements BaseColumns {
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_REPOS).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + AUTHORITY + "/" + PATH_REPOS;
+        public static final String CONTENT_TYPE_ITEM =
+                "vnd.android.cursor.dir/" + AUTHORITY + "/" + PATH_REPOS + "/*";
+
+        // Table name
+        public static final String TABLE_NAME = "repos";
+
+        // Table columns
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_SIZE = "size";
+
+    }
 }

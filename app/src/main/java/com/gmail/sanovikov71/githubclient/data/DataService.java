@@ -8,8 +8,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.network.RetrofitService;
+import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 import com.gmail.sanovikov71.githubclient.ui.UiElement;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
@@ -118,7 +120,44 @@ public class DataService extends Service {
                 serverSearchListener.onSearchError(-1);
             }
         });
+    }
 
+    public void fetchRepos(final UiElement ui, String ownerName) {
+        Log.i(TAG, "fetchRepos");
+        mGithub.fetchRepos(ownerName).enqueue(new Callback<List<Repo>>() {
+            @Override
+            public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
+                ui.hideProgressDialog();
+
+                Log.i(TAG, "fetchRepos ok");
+
+                final List<Repo> body = response.body();
+                Log.i(TAG, "fetchRepos ok: " + body.size());
+
+                if (response.isSuccessful()) {
+                    final int size = body.size();
+                    ContentValues reposList[] = new ContentValues[size];
+                    for (int i = 0; i < size; i++) {
+                        ContentValues repoValues = new ContentValues();
+                        final Repo repo = body.get(i);
+                        repoValues.put(RepoEntry.COLUMN_NAME, repo.getName());
+                        repoValues.put(RepoEntry.COLUMN_SIZE, repo.getSize());
+                        reposList[i] = repoValues;
+                    }
+
+                    getContentResolver()
+                            .bulkInsert(RepoEntry.CONTENT_URI, reposList);
+                } else {
+                    ui.showError(response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Repo>> call, Throwable t) {
+                ui.hideProgressDialog();
+                ui.showError(-1);
+            }
+        });
     }
 
     // Just boilerplate as always in android

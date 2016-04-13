@@ -1,6 +1,7 @@
 
 package com.gmail.sanovikov71.githubclient.network;
 
+import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
 
 import retrofit2.Call;
@@ -18,5 +19,8 @@ public interface RetrofitService {
 
     @GET("users/{login}")
     Call<User> fetchUser(@Path("login") String login);
+
+    @GET("users/{owner}/repos")
+    Call<List<Repo>> fetchRepos(@Path("owner") String owner);
 
 }

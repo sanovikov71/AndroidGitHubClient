@@ -23,6 +23,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.detail.DetailActivity"
+            android:label="@string/fix_me"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
         <service
             android:name=".data.DataService"
             android:exported="false"/>

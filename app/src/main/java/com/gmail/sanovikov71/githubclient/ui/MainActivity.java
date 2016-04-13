@@ -31,6 +31,7 @@ import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
+import com.gmail.sanovikov71.githubclient.ui.detail.DetailActivity;
 import com.gmail.sanovikov71.githubclient.ui.drawer.recent.RecentsFragment;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchStateListener;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
@@ -180,6 +181,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClickUser(int userId) {
         updateRecentsStorage(userId);
+        Intent intent = new Intent(this, DetailActivity.class);
+//        intent.putExtra(CardDetailActivity.EXTRA_CARD_ID, id);
+        startActivity(intent);
     }
 
     private void updateRecentsStorage(int newRecentUserId) {

@@ -6,4 +6,6 @@
 
     <string name="action_settings">Settings</string>
     <string name="user_avatar">User avatar</string>
+
+    <string name="fix_me">Fix me</string>
 </resources>
