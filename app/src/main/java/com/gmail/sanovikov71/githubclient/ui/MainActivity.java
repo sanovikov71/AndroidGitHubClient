@@ -1,4 +1,3 @@
-
 package com.gmail.sanovikov71.githubclient.ui;
 
 import android.content.ComponentName;
@@ -54,6 +53,8 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout mRefreshView;
     private int mNumberOfLoadedEntries = 0;
 
+    public static final int MAIN_ACTIVITY_LOADER_ID = 200;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +75,7 @@ public class MainActivity extends AppCompatActivity
 
         mRecentContainer = (FrameLayout) findViewById(R.id.recents_fragment_container);
 
-        // TODO: change loader id
-        getSupportLoaderManager().initLoader(200, null, this);
+        getSupportLoaderManager().initLoader(MAIN_ACTIVITY_LOADER_ID, null, this);
 
         showRecentsFragment();
     }
@@ -235,7 +235,6 @@ public class MainActivity extends AppCompatActivity
         mDataService.searchUsers(this, query);
     }
 
-    // TODO: transaction is actually unnecessary here
     private void showRecentsFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -244,7 +243,6 @@ public class MainActivity extends AppCompatActivity
         mRecentContainer.setVisibility(View.VISIBLE);
     }
 
-    // TODO: transaction is actually unnecessary here
     private void hideRecentsFragment() {
         final FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment recentsFragment = supportFragmentManager.findFragmentByTag(TAG_RECENTS_FRAGMENT);

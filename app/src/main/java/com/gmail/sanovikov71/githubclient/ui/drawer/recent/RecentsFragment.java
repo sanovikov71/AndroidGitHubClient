@@ -104,7 +104,6 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
             if (data != null && data.moveToFirst()) {
                 do {
                     int id = data.getInt(data.getColumnIndex(UserEntry.COLUMN_GITHUB_ID));
-                    // TODO: дичь какая-то
                     if (mRecentIds.get(i).equals(String.valueOf(id))) {
                         String login =
                                 data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));

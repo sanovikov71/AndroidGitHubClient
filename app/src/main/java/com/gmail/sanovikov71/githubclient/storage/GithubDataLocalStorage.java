@@ -179,59 +179,7 @@ public class GithubDataLocalStorage extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-
-        Log.i(TAG, "Provider update");
-        Log.i(TAG, "values w: " + values.getAsString(UserEntry.COLUMN_LOGIN));
-        Log.i(TAG, "values url: " + values.getAsString(UserEntry.COLUMN_AVATAR_URL));
-        Log.i(TAG, "selection: " + selection);
-
-        //        SQLiteDatabase db = mHelper.getWritableDatabase();
-        //
-        //        switch (URI_MATCHER.match(uri)) {
-        //            case USER_ID:
-        //                String rowID = uri.getPathSegments().get(1);
-        //                selection = UserEntry.COLUMN_ID + " = " + rowID +
-        //                        (!TextUtils.isEmpty(selection) ? "AND (" + selection + ')' : "");
-        //            default:
-        //                break;
-        //        }
-        //
-        int updateCount = 0;
-        //
-        //        // There are two basic case when update is used
-        //
-        //        Log.i(TAG, "val: " + values.getAsString(UserEntry.COLUMN_WORD));
-        //        Log.i(TAG, "translation: " + values.getAsString(UserEntry.COLUMN_TRANSLATION));
-        //        // TODO review this part of the code
-        //        if (values.containsKey(UserEntry.COLUMN_WORD)
-        //                && values.containsKey(UserEntry.COLUMN_TRANSLATION)) {
-        //            // The first one is typo correcting in card details,
-        //            // In this case word and translation are not null and
-        //            // SQLiteDatabase::updateWithOnConflict method is used to completely
-        //            // replace a row in the database
-        //            updateCount = db.updateWithOnConflict(
-        //                    UserEntry.TABLE_NAME,
-        //                    values,
-        //                    selection,
-        //                    selectionArgs,
-        //                    SQLiteDatabase.CONFLICT_IGNORE
-        //                    );
-        //        } else {
-        //            // The second one is img_url updating, when a new image
-        //            // is selected for a card, here full replacing is
-        //            // unnecessary and SQLiteDatabase::update method is used to change
-        //            // img_url column only
-        //            Log.i("novikov", "val: " + values.getAsString(UserEntry.COLUMN_WORD));
-        //            updateCount = db.update(
-        //                    UserEntry.TABLE_NAME,
-        //                    values,
-        //                    selection,
-        //                    selectionArgs
-        //                    );
-        //        }
-
-        getContext().getContentResolver().notifyChange(uri, null);
-        return updateCount;
+        throw new RuntimeException("Method update is not implemented for now");
     }
 
 }

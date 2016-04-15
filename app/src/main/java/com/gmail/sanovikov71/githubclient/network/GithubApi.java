@@ -12,8 +12,7 @@ import retrofit2.http.Query;
 
 import java.util.List;
 
-// TODO: Rename it!
-public interface RetrofitService {
+public interface GithubApi {
 
     @GET("users")
     Call<List<User>> fetchUsers(@Query("since") int since);

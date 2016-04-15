@@ -11,7 +11,7 @@ import android.util.Log;
 import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.model.UserSearchResult;
-import com.gmail.sanovikov71.githubclient.network.RetrofitService;
+import com.gmail.sanovikov71.githubclient.network.GithubApi;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 import com.gmail.sanovikov71.githubclient.ui.UiElement;
@@ -30,7 +30,7 @@ public class DataService extends Service {
     private static final String API_URL = "https://api.github.com/";
     private static final String TAG = "DataService";
 
-    private RetrofitService mGithub;
+    private GithubApi mGithub;
 
     @Override
     public void onCreate() {
@@ -38,7 +38,7 @@ public class DataService extends Service {
                 .baseUrl(API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        mGithub = retrofit.create(RetrofitService.class);
+        mGithub = retrofit.create(GithubApi.class);
     }
 
     //    public static final String ACTION_FETCH = "com.gmail.sanovikov71.githubclient.ACTION_FETCH";
