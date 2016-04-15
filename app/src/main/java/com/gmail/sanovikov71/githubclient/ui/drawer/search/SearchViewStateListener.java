@@ -6,5 +6,5 @@ public interface SearchViewStateListener {
 
     void onNoSearchResults();
 
-    void onSearch(String query);
+    void onSearchQuerySubmitted(String query);
 }

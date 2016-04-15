@@ -1,14 +1,11 @@
-package com.gmail.sanovikov71.githubclient.ui;
 
-import android.content.ComponentName;
-import android.content.Context;
+package com.gmail.sanovikov71.githubclient.ui.list;
+
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -17,35 +14,35 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.gmail.sanovikov71.githubclient.R;
-import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
+import com.gmail.sanovikov71.githubclient.ui.BoundActivity;
 import com.gmail.sanovikov71.githubclient.ui.detail.DetailActivity;
 import com.gmail.sanovikov71.githubclient.ui.drawer.recent.RecentsFragment;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchFragment;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchViewStateListener;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.OnUserListClickListener;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.ProgressBarUiElement;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.ScrollingUi;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity
-        implements UiElement,
+public class MainActivity extends BoundActivity
+        implements ProgressBarUiElement,
         SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor>,
         ScrollingUi, OnUserListClickListener, SearchViewStateListener, ServerSearchListener {
 
-    public static final String TAG = "MainActivity";
     private static final String TAG_RECENTS_FRAGMENT = "TAG_RECENTS_FRAGMENT";
 
     private FrameLayout mRecentContainer;
@@ -58,7 +55,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -78,35 +74,6 @@ public class MainActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(MAIN_ACTIVITY_LOADER_ID, null, this);
 
         showRecentsFragment();
-    }
-
-    private DataService mDataService;
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            DataService.LocalBinder binder = (DataService.LocalBinder) service;
-            mDataService = binder.getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mDataService = null;
-        }
-    };
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bindService(new Intent(this, DataService.class), mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (null != mDataService) {
-            unbindService(mConnection);
-        }
     }
 
     @Override
@@ -137,7 +104,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        getSupportLoaderManager().getLoader(MAIN_ACTIVITY_LOADER_ID).forceLoad();
     }
 
     @Override
@@ -161,13 +128,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void render() {
+        getSupportLoaderManager().getLoader(MAIN_ACTIVITY_LOADER_ID).forceLoad();
+    }
+
+    @Override
     public void showError(int stringId) {
         Toast.makeText(this, String.valueOf(stringId), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onRefresh() {
-        Log.i(TAG, "onRefresh");
         if (null != mDataService) {
             showProgressDialog();
             mDataService.fetchUsers(this);
@@ -231,7 +202,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSearch(String query) {
+    public void onSearchQuerySubmitted(String query) {
         mDataService.searchUsers(this, query);
     }
 

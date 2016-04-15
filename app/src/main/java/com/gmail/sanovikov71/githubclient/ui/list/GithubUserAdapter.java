@@ -1,4 +1,4 @@
-package com.gmail.sanovikov71.githubclient.ui;
+package com.gmail.sanovikov71.githubclient.ui.list;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.model.User;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.OnUserListClickListener;
 
 import java.util.ArrayList;
 import java.util.List;

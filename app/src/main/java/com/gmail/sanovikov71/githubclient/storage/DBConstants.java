@@ -19,14 +19,4 @@ public class DBConstants {
             RepoEntry.COLUMN_SIZE
     };
 
-    public static final String[] USER_DETAIL_COLUMNS = {
-            UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_GITHUB_ID,
-            UserEntry.COLUMN_LOGIN,
-            UserEntry.COLUMN_AVATAR_URL,
-            RepoEntry.TABLE_NAME + "." + RepoEntry.COLUMN_GITHUB_ID,
-            RepoEntry.COLUMN_OWNER_ID,
-            RepoEntry.COLUMN_NAME,
-            RepoEntry.COLUMN_SIZE
-    };
-
 }

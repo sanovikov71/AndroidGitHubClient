@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.model.User;
-import com.gmail.sanovikov71.githubclient.ui.OnUserListClickListener;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.OnUserListClickListener;
 
 import java.util.ArrayList;
 import java.util.List;

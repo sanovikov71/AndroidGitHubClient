@@ -10,12 +10,9 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
@@ -85,8 +82,6 @@ public class GithubDataLocalStorage extends ContentProvider {
 
         String rowID = null;
 
-//        Log.i(TAG, "query for path: " + uri.getPathSegments() + " with uri: " + URI_MATCHER.match(uri));
-
         switch (URI_MATCHER.match(uri)) {
             case USER_ID:
                 rowID = uri.getPathSegments().get(1);
@@ -114,8 +109,6 @@ public class GithubDataLocalStorage extends ContentProvider {
         Cursor cursor = queryBuilder
                 .query(db, projection, selection, selectionArgs, null, null, sortOrder);
 
-//        Log.i(TAG, "cursor for path: " + uri.getPathSegments() + " with uri: " + URI_MATCHER.match(uri));
-//        DatabaseUtils.dumpCursor(cursor);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
@@ -128,15 +121,15 @@ public class GithubDataLocalStorage extends ContentProvider {
         long id = -1;
         Uri insertedId = null;
 
-//        Log.i(TAG, "insert with uri: " + URI_MATCHER.match(uri));
-
         switch (URI_MATCHER.match(uri)) {
             case USER_LIST:
-                id = db.insert(UserEntry.TABLE_NAME, null, values);
+                id = db.insertWithOnConflict(UserEntry.TABLE_NAME, null, values,
+                        SQLiteDatabase.CONFLICT_REPLACE);
                 insertedId = ContentUris.withAppendedId(UserEntry.CONTENT_URI, id);
                 break;
             case REPO_LIST:
-                id = db.insertWithOnConflict(RepoEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+                id = db.insertWithOnConflict(RepoEntry.TABLE_NAME, null, values,
+                        SQLiteDatabase.CONFLICT_REPLACE);
                 insertedId = ContentUris.withAppendedId(RepoEntry.CONTENT_URI, id);
                 break;
             default:
@@ -153,28 +146,7 @@ public class GithubDataLocalStorage extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-
-        SQLiteDatabase db = mHelper.getWritableDatabase();
-
-        switch (URI_MATCHER.match(uri)) {
-            case USER_ID:
-                String rowID = uri.getPathSegments().get(1);
-                selection = UserEntry.COLUMN_GITHUB_ID + " = " + rowID +
-                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : "");
-                break;
-            default:
-                break;
-        }
-
-        if (selection == null) {
-            selection = "1";
-        }
-
-        int deleteCount = db.delete(UserEntry.TABLE_NAME, selection, selectionArgs);
-
-        getContext().getContentResolver().notifyChange(uri, null);
-
-        return deleteCount;
+        throw new RuntimeException("Method delete is not implemented for now");
     }
 
     @Override

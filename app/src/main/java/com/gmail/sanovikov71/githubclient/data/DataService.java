@@ -14,7 +14,8 @@ import com.gmail.sanovikov71.githubclient.model.UserSearchResult;
 import com.gmail.sanovikov71.githubclient.network.GithubApi;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
-import com.gmail.sanovikov71.githubclient.ui.UiElement;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.ProgressBarUiElement;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.UiElement;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
 
 import retrofit2.Call;
@@ -52,16 +53,16 @@ public class DataService extends Service {
     //        return START_NOT_STICKY;
     //    }
 
-    public void fetchUsers(final UiElement ui) {
+    public void fetchUsers(final ProgressBarUiElement ui) {
         fetch(ui, 0);
     }
 
-    public void fetchMoreUsers(final UiElement ui, int offset) {
+    public void fetchMoreUsers(final ProgressBarUiElement ui, int offset) {
         Log.i(TAG, "fetchMoreUsers with offset: " + offset);
         fetch(ui, offset);
     }
 
-    public void fetch(final UiElement ui, int since) {
+    public void fetch(final ProgressBarUiElement ui, int since) {
         Log.i(TAG, "fetch");
         mGithub.fetchUsers(since).enqueue(new Callback<List<User>>() {
             @Override
@@ -98,17 +99,10 @@ public class DataService extends Service {
     }
 
     public void fetchRepos(final UiElement ui, String ownerName) {
-        Log.i(TAG, "fetchRepos");
         mGithub.fetchRepos(ownerName).enqueue(new Callback<List<Repo>>() {
             @Override
             public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
-                ui.hideProgressDialog();
-
-                Log.i(TAG, "fetchRepos ok");
-
                 final List<Repo> body = response.body();
-                Log.i(TAG, "fetchRepos ok: " + body.size());
-
                 if (response.isSuccessful()) {
                     final int size = body.size();
                     ContentValues reposList[] = new ContentValues[size];
@@ -125,7 +119,7 @@ public class DataService extends Service {
                     getContentResolver()
                             .bulkInsert(RepoEntry.CONTENT_URI, reposList);
 
-                    ui.hideProgressDialog();
+                    ui.render();
                 } else {
                     ui.showError(response.code());
                 }
@@ -133,7 +127,6 @@ public class DataService extends Service {
 
             @Override
             public void onFailure(Call<List<Repo>> call, Throwable t) {
-                ui.hideProgressDialog();
                 ui.showError(-1);
             }
         });

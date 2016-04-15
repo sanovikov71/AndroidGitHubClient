@@ -64,7 +64,7 @@ public class SearchFragment extends Fragment {
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSearchListener.onSearch(query);
+                mSearchListener.onSearchQuerySubmitted(query);
                 return false;
             }
 
