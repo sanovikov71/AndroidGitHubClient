@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
+import com.gmail.sanovikov71.githubclient.model.UserSearchResult;
 import com.gmail.sanovikov71.githubclient.network.RetrofitService;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
@@ -96,35 +97,6 @@ public class DataService extends Service {
         });
     }
 
-    public void fetchUser(final ServerSearchListener serverSearchListener, String login) {
-        mGithub.fetchUser(login).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                final User user = response.body();
-                if (response.isSuccessful()) {
-                    ContentValues userValues = new ContentValues();
-                    userValues.put(UserEntry.COLUMN_GITHUB_ID, user.getId());
-                    userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
-                    userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
-
-                    getContentResolver()
-                            .insert(UserEntry.CONTENT_URI, userValues);
-
-                    serverSearchListener.onSearchResult();
-                } else {
-                    serverSearchListener.onSearchError(response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.i(TAG, "url: " + call.request().url().toString());
-                Log.i(TAG, "failure reason: " + t.toString());
-                serverSearchListener.onSearchError(-1);
-            }
-        });
-    }
-
     public void fetchRepos(final UiElement ui, String ownerName) {
         Log.i(TAG, "fetchRepos");
         mGithub.fetchRepos(ownerName).enqueue(new Callback<List<Repo>>() {
@@ -161,6 +133,52 @@ public class DataService extends Service {
 
             @Override
             public void onFailure(Call<List<Repo>> call, Throwable t) {
+                ui.hideProgressDialog();
+                ui.showError(-1);
+            }
+        });
+    }
+
+    public void searchUsers(final UiElement ui, String userToFind) {
+        Log.i(TAG, "searchUsers");
+        mGithub.searchUsers(userToFind).enqueue(new Callback<UserSearchResult>() {
+            @Override
+            public void onResponse(Call<UserSearchResult> call, Response<UserSearchResult> response) {
+
+                Log.i(TAG, "url: " + call.request().url().toString());
+
+                // TODO: remove ui.hideProgressDialog()
+                ui.hideProgressDialog();
+                final UserSearchResult body = response.body();
+
+                if (response.isSuccessful()) {
+                    List<User> users = body.getItems();
+                    final int size = users.size();
+                    ContentValues userList[] = new ContentValues[size];
+                    for (int i = 0; i < size; i++) {
+                        ContentValues userValues = new ContentValues();
+                        final User user = users.get(i);
+                        userValues.put(UserEntry.COLUMN_GITHUB_ID, user.getId());
+                        userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
+                        userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
+                        userList[i] = userValues;
+                    }
+
+                    getContentResolver()
+                            .bulkInsert(UserEntry.CONTENT_URI, userList);
+
+                    ui.hideProgressDialog();
+                } else {
+                    ui.showError(response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserSearchResult> call, Throwable t) {
+
+                Log.i(TAG, "url: " + call.request().url().toString());
+                Log.i(TAG, "throwable: " + t.toString());
+
                 ui.hideProgressDialog();
                 ui.showError(-1);
             }

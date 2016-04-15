@@ -13,11 +13,13 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.gmail.sanovikov71.githubclient.R;
+import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 
@@ -26,9 +28,14 @@ import java.util.List;
 
 public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static final String TAG = "SearchFragment";
+
+    private static final int SEARCH_RESULT_LOADER_ID = 1;
+
     private SearchResultAdapter mSearchResultsAdapter;
     private SearchStateListener mSearchListener;
-    private String mSearchQuery;
+
+    //    private String mSearchQuery;
 
     @Override
     public void onAttach(Context context) {
@@ -45,13 +52,20 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().getSupportLoaderManager().initLoader(400, null, this);
+        getLoaderManager().initLoader(SEARCH_RESULT_LOADER_ID, null, this);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
+
+        RecyclerView searchResults = (RecyclerView) view.findViewById(R.id.search_results);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        searchResults.setLayoutManager(layoutManager);
+
+        mSearchResultsAdapter = new SearchResultAdapter(getActivity());
+        searchResults.setAdapter(mSearchResultsAdapter);
 
         SearchView search = (SearchView) view.findViewById(R.id.search_view);
         search.setOnSearchClickListener(new View.OnClickListener() {
@@ -64,13 +78,14 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public boolean onClose() {
                 mSearchListener.onNoSearchResults();
+                mSearchResultsAdapter.resetDataset();
                 return false;
             }
         });
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSearchQuery = query;
+                //                mSearchQuery = query;
                 mSearchListener.onSearch(query);
                 return false;
             }
@@ -80,13 +95,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
                 return false;
             }
         });
-
-        RecyclerView searchResults = (RecyclerView) view.findViewById(R.id.search_results);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        searchResults.setLayoutManager(layoutManager);
-
-        mSearchResultsAdapter = new SearchResultAdapter(getActivity());
-        searchResults.setAdapter(mSearchResultsAdapter);
 
         return view;
     }
@@ -100,18 +108,22 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        List<String> logins = new ArrayList<>();
+        Log.i(TAG, "onLoadFinished search: " + data.getCount());
+        List<User> users = new ArrayList<>();
         if (data != null && data.moveToFirst()) {
             do {
+                int id =
+                        data.getInt(data.getColumnIndex(UserEntry.COLUMN_GITHUB_ID));
                 String login =
                         data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
-                if (mSearchQuery != null && mSearchQuery.equals(login)) {
-                    logins.add(login);
-                }
+                String avatarUrl =
+                        data.getString(data.getColumnIndex(UserEntry.COLUMN_AVATAR_URL));
+                User user = new User(id, login, avatarUrl);
+                users.add(user);
             } while (data.moveToNext());
         }
         if (mSearchResultsAdapter != null) {
-            mSearchResultsAdapter.updateDataset(logins);
+            mSearchResultsAdapter.updateDataset(users);
         }
     }
 
@@ -119,4 +131,10 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+    public void searchResultsLoaded() {
+        Log.i(TAG, "searchResultsLoaded");
+        getLoaderManager().getLoader(SEARCH_RESULT_LOADER_ID).forceLoad();
+    }
+
 }

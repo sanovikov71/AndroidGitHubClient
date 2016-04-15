@@ -3,6 +3,7 @@ package com.gmail.sanovikov71.githubclient.network;
 
 import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
+import com.gmail.sanovikov71.githubclient.model.UserSearchResult;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -22,5 +23,9 @@ public interface RetrofitService {
 
     @GET("users/{owner}/repos")
     Call<List<Repo>> fetchRepos(@Path("owner") String owner);
+
+    // https://api.github.com/search/users?q=sanovik
+    @GET("search/users")
+    Call<UserSearchResult> searchUsers(@Query("q") String nameToFind);
 
 }

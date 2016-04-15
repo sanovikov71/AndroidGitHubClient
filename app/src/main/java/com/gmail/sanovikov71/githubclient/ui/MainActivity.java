@@ -1,3 +1,4 @@
+
 package com.gmail.sanovikov71.githubclient.ui;
 
 import android.content.ComponentName;
@@ -33,6 +34,7 @@ import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 import com.gmail.sanovikov71.githubclient.ui.detail.DetailActivity;
 import com.gmail.sanovikov71.githubclient.ui.drawer.recent.RecentsFragment;
+import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchFragment;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchStateListener;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
 
@@ -156,11 +158,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void hideProgressDialog() {
         mRefreshView.setRefreshing(false);
+
+        ((SearchFragment) getSupportFragmentManager().findFragmentById(R.id.search_fragment))
+                .searchResultsLoaded();
     }
 
     @Override
     public void showError(int stringId) {
-        Toast.makeText(this, getString(stringId), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.valueOf(stringId), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -247,7 +252,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSearch(String query) {
-        mDataService.fetchUser(this, query);
+        mDataService.searchUsers(this, query);
     }
 
     @Override

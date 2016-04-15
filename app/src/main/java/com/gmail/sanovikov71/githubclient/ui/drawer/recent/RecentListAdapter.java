@@ -18,14 +18,14 @@ import java.util.List;
 class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
-    private List<User> mLogins = new ArrayList<>();
+    private List<User> mUsers = new ArrayList<>();
 
     public RecentListAdapter(Context context) {
         mContext = context;
     }
 
     public void updateDataset(List<User> data) {
-        mLogins = data;
+        mUsers = data;
         notifyDataSetChanged();
     }
 
@@ -40,7 +40,7 @@ class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ViewHolder typedHolder = (ViewHolder) holder;
 
-        User user = mLogins.get(position);
+        User user = mUsers.get(position);
         typedHolder.mUserId = user.getId();
         typedHolder.mName.setText(user.getLogin());
     }
@@ -52,13 +52,13 @@ class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mLogins.size();
+        return mUsers.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView mName;
-        private int mUserId;
+        int mUserId;
 
         public ViewHolder(Context context, View view) {
             super(view);

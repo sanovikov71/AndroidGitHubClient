@@ -33,9 +33,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         , UiElement {
 
     public static final String EXTRA_USER_ID = "EXTRA_USER_ID";
-
-    private static final int USER_LOADER_ID = 500;
-    private static final int REPOS_LOADER_ID = 501;
+    private static final int USER_LOADER_ID = 1;
+    private static final int REPOS_LOADER_ID = 2;
 
     private int mUserId;
     private String mUserName;
