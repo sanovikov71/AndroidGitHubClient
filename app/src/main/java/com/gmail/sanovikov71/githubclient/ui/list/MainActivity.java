@@ -1,11 +1,14 @@
 
 package com.gmail.sanovikov71.githubclient.ui.list;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -14,6 +17,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +26,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.gmail.sanovikov71.githubclient.R;
+import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
@@ -59,6 +64,14 @@ public class MainActivity extends BoundActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        initServiceConnection();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
         RecyclerView githubUsersList = (RecyclerView) findViewById(R.id.recycler);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         githubUsersList.setLayoutManager(layoutManager);
@@ -74,6 +87,22 @@ public class MainActivity extends BoundActivity
         getSupportLoaderManager().initLoader(MAIN_ACTIVITY_LOADER_ID, null, this);
 
         showRecentsFragment();
+    }
+
+    private void initServiceConnection() {
+        mConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                DataService.LocalBinder binder = (DataService.LocalBinder) service;
+                mDataService = binder.getService();
+                mDataService.fetchUsers(MainActivity.this);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mDataService = null;
+            }
+        };
     }
 
     @Override

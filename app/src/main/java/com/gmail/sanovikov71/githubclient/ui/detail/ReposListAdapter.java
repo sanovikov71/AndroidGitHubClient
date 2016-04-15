@@ -16,13 +16,7 @@ import java.util.List;
 
 public class ReposListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final Context mContext;
     private List<Repo> mReposData = new ArrayList<>();
-    private static final String TAG = ReposListAdapter.class.getSimpleName();
-
-    public ReposListAdapter(Context context) {
-        mContext = context;
-    }
 
     public void updateDataset(List<Repo> data) {
         mReposData = data;

@@ -34,8 +34,8 @@ public class DetailActivity extends BoundActivity implements LoaderManager.Loade
         , UiElement {
 
     public static final String EXTRA_USER_ID = "EXTRA_USER_ID";
-    private static final int USER_LOADER_ID = 1;
-    private static final int REPOS_LOADER_ID = 2;
+    private static final int USER_LOADER_ID = 501;
+    private static final int REPOS_LOADER_ID = 502;
 
     private int mUserId;
     private String mUserName;
@@ -61,7 +61,7 @@ public class DetailActivity extends BoundActivity implements LoaderManager.Loade
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         userReposList.setLayoutManager(layoutManager);
 
-        mReposListAdapter = new ReposListAdapter(this);
+        mReposListAdapter = new ReposListAdapter();
         userReposList.setAdapter(mReposListAdapter);
 
         getSupportLoaderManager().initLoader(USER_LOADER_ID, null, this);

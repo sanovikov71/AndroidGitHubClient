@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.gmail.sanovikov71.githubclient.model.Repo;
 import com.gmail.sanovikov71.githubclient.model.User;
@@ -41,17 +40,6 @@ public class DataService extends Service {
                 .build();
         mGithub = retrofit.create(GithubApi.class);
     }
-
-    //    public static final String ACTION_FETCH = "com.gmail.sanovikov71.githubclient.ACTION_FETCH";
-
-    //    @Override
-    //    public int onStartCommand(Intent intent, int flags, int startId) {
-    //        if (ACTION_FETCH.equals(intent.getAction())) {
-    //            fetchUsers();
-    //        }
-    //
-    //        return START_NOT_STICKY;
-    //    }
 
     public void fetchUsers(final ProgressBarUiElement ui) {
         fetch(ui, 0);
