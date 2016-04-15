@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    android:id="@+id/item_drawer_name"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:layout_alignParentBottom="true"
+    android:layout_toEndOf="@+id/item_avatar"
+    android:layout_toRightOf="@+id/item_avatar"
+    android:gravity="center_vertical"
+    android:paddingEnd="@dimen/recent_padding"
+    android:paddingLeft="@dimen/recent_padding"
+    android:paddingRight="@dimen/recent_padding"
+    android:paddingStart="@dimen/recent_padding"/>

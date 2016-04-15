@@ -1,9 +1,11 @@
 
-package com.gmail.sanovikov71.githubclient.ui;
+package com.gmail.sanovikov71.githubclient.ui.list;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+
+import com.gmail.sanovikov71.githubclient.ui.interfaces.ScrollingUi;
 
 public class EndlessScrollListener extends RecyclerView.OnScrollListener {
 

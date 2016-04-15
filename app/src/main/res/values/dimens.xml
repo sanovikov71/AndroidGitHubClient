@@ -6,4 +6,9 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="recent_padding">24dp</dimen>
+    <dimen name="detail_padding">24dp</dimen>
+    <dimen name="detail_user_name_padding">24dp</dimen>
+
 </resources>

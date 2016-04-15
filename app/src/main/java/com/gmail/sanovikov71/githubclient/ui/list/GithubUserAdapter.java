@@ -1,4 +1,4 @@
-package com.gmail.sanovikov71.githubclient.ui;
+package com.gmail.sanovikov71.githubclient.ui.list;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.model.User;
+import com.gmail.sanovikov71.githubclient.ui.interfaces.OnUserListClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ class GithubUserAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_user_row, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(mContext, view);
     }
 
     @Override
@@ -41,6 +42,7 @@ class GithubUserAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ViewHolder typedHolder = (ViewHolder) holder;
 
         User user = mUsersData.get(position);
+        typedHolder.mUserId = user.getId();
         typedHolder.mName.setText(user.getLogin());
 
         Glide.with(mContext)
@@ -60,13 +62,29 @@ class GithubUserAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
+        int mUserId;
         ImageView mAvatar;
         TextView mName;
 
-        public ViewHolder(View view) {
+        public ViewHolder(Context context, View view) {
             super(view);
             mAvatar = (ImageView) view.findViewById(R.id.item_avatar);
             mName = (TextView) view.findViewById(R.id.item_name);
+
+            final OnUserListClickListener listener;
+            try {
+                listener = (OnUserListClickListener) context;
+            } catch (ClassCastException cce) {
+                throw new ClassCastException(context.getClass().getSimpleName()
+                        + " must implement OnItemClickListener interface");
+            }
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onClickUser(mUserId);
+                }
+            });
         }
     }
 

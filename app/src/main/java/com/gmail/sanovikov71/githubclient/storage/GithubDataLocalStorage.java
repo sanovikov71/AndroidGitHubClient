@@ -1,6 +1,10 @@
 
 package com.gmail.sanovikov71.githubclient.storage;
 
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.AUTHORITY;
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.PATH_REPOS;
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.PATH_USERS;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -9,24 +13,26 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Log;
+
+import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.RepoEntry;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 
 public class GithubDataLocalStorage extends ContentProvider {
 
-    public static final String TAG = GithubDataLocalStorage.class.getSimpleName();
-
-    private static final int USER_LIST = 1;
-    private static final int USER_ID = 2;
+    private static final int USER_LIST = 100;
+    private static final int USER_ID = 101;
+    private static final int REPO_LIST = 200;
+    private static final int REPO_ID = 201;
     private static final UriMatcher URI_MATCHER;
 
     private GithubDataHelper mHelper;
 
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_USERS, USER_LIST);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_USERS + "/#", USER_ID);
+        URI_MATCHER.addURI(AUTHORITY, PATH_USERS, USER_LIST);
+        URI_MATCHER.addURI(AUTHORITY, PATH_USERS + "/#", USER_ID);
+        URI_MATCHER.addURI(AUTHORITY, PATH_REPOS, REPO_LIST);
+        URI_MATCHER.addURI(AUTHORITY, PATH_REPOS + "/#", REPO_ID);
     }
 
     @Override
@@ -42,10 +48,18 @@ public class GithubDataLocalStorage extends ContentProvider {
                 return UserEntry.CONTENT_TYPE;
             case USER_ID:
                 return UserEntry.CONTENT_TYPE_ITEM;
+            case REPO_LIST:
+                return RepoEntry.CONTENT_TYPE;
+            case REPO_ID:
+                return RepoEntry.CONTENT_TYPE_ITEM;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
     }
+
+    private static final String sUserTables = UserEntry.TABLE_NAME;
+
+    private static final String sRepoTables = RepoEntry.TABLE_NAME;
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
@@ -54,12 +68,26 @@ public class GithubDataLocalStorage extends ContentProvider {
         SQLiteDatabase db = mHelper.getWritableDatabase();
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-        queryBuilder.setTables(UserEntry.TABLE_NAME);
+
+        String rowID = null;
 
         switch (URI_MATCHER.match(uri)) {
             case USER_ID:
-                String rowID = uri.getPathSegments().get(1);
-                queryBuilder.appendWhere(UserEntry.COLUMN_ID + " = " + rowID);
+                rowID = uri.getPathSegments().get(1);
+                queryBuilder.setTables(sUserTables);
+                queryBuilder.appendWhere(UserEntry.COLUMN_GITHUB_ID + " = " + rowID);
+                break;
+            case USER_LIST:
+                queryBuilder.setTables(sUserTables);
+                break;
+            case REPO_ID:
+                queryBuilder.setTables(sRepoTables);
+                rowID = uri.getPathSegments().get(1);
+                queryBuilder.appendWhere(RepoEntry.COLUMN_GITHUB_ID + " = " + rowID);
+                break;
+            case REPO_LIST:
+                queryBuilder.setTables(sRepoTables);
+                break;
             default:
                 break;
         }
@@ -70,16 +98,31 @@ public class GithubDataLocalStorage extends ContentProvider {
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
-
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase db = mHelper.getWritableDatabase();
 
-        long id = db.insert(GithubDataContract.UserEntry.TABLE_NAME, null, values);
+        long id = -1;
+        Uri insertedId = null;
+
+        switch (URI_MATCHER.match(uri)) {
+            case USER_LIST:
+                id = db.insertWithOnConflict(UserEntry.TABLE_NAME, null, values,
+                        SQLiteDatabase.CONFLICT_REPLACE);
+                insertedId = ContentUris.withAppendedId(UserEntry.CONTENT_URI, id);
+                break;
+            case REPO_LIST:
+                id = db.insertWithOnConflict(RepoEntry.TABLE_NAME, null, values,
+                        SQLiteDatabase.CONFLICT_REPLACE);
+                insertedId = ContentUris.withAppendedId(RepoEntry.CONTENT_URI, id);
+                break;
+            default:
+                break;
+        }
+
         if (id > -1) {
-            Uri insertedId = ContentUris.withAppendedId(UserEntry.CONTENT_URI, id);
             getContext().getContentResolver().notifyChange(insertedId, null);
             return insertedId;
         } else {
@@ -89,84 +132,12 @@ public class GithubDataLocalStorage extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-
-        SQLiteDatabase db = mHelper.getWritableDatabase();
-
-        switch (URI_MATCHER.match(uri)) {
-            case USER_ID:
-                String rowID = uri.getPathSegments().get(1);
-                selection = GithubDataContract.UserEntry.COLUMN_ID + " = " + rowID +
-                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : "");
-            default:
-                break;
-        }
-
-        if (selection == null) {
-            selection = "1";
-        }
-
-        int deleteCount = db.delete(GithubDataContract.UserEntry.TABLE_NAME, selection, selectionArgs);
-
-        getContext().getContentResolver().notifyChange(uri, null);
-
-        return deleteCount;
+        throw new RuntimeException("Method delete is not implemented for now");
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-
-        Log.i(TAG, "Provider update");
-        Log.i(TAG, "values w: " + values.getAsString(UserEntry.COLUMN_LOGIN));
-        Log.i(TAG, "values url: " + values.getAsString(UserEntry.COLUMN_AVATAR_URL));
-        Log.i(TAG, "selection: " + selection);
-
-//        SQLiteDatabase db = mHelper.getWritableDatabase();
-//
-//        switch (URI_MATCHER.match(uri)) {
-//            case USER_ID:
-//                String rowID = uri.getPathSegments().get(1);
-//                selection = UserEntry.COLUMN_ID + " = " + rowID +
-//                        (!TextUtils.isEmpty(selection) ? "AND (" + selection + ')' : "");
-//            default:
-//                break;
-//        }
-//
-        int updateCount = 0;
-//
-//        // There are two basic case when update is used
-//
-//        Log.i(TAG, "val: " + values.getAsString(UserEntry.COLUMN_WORD));
-//        Log.i(TAG, "translation: " + values.getAsString(UserEntry.COLUMN_TRANSLATION));
-//        // TODO review this part of the code
-//        if (values.containsKey(UserEntry.COLUMN_WORD)
-//                && values.containsKey(UserEntry.COLUMN_TRANSLATION)) {
-//            // The first one is typo correcting in card details,
-//            // In this case word and translation are not null and
-//            // SQLiteDatabase::updateWithOnConflict method is used to completely
-//            // replace a row in the database
-//            updateCount = db.updateWithOnConflict(
-//                    UserEntry.TABLE_NAME,
-//                    values,
-//                    selection,
-//                    selectionArgs,
-//                    SQLiteDatabase.CONFLICT_IGNORE
-//                    );
-//        } else {
-//            // The second one is img_url updating, when a new image
-//            // is selected for a card, here full replacing is
-//            // unnecessary and SQLiteDatabase::update method is used to change
-//            // img_url column only
-//            Log.i("novikov", "val: " + values.getAsString(UserEntry.COLUMN_WORD));
-//            updateCount = db.update(
-//                    UserEntry.TABLE_NAME,
-//                    values,
-//                    selection,
-//                    selectionArgs
-//                    );
-//        }
-
-        getContext().getContentResolver().notifyChange(uri, null);
-        return updateCount;
+        throw new RuntimeException("Method update is not implemented for now");
     }
 
 }
