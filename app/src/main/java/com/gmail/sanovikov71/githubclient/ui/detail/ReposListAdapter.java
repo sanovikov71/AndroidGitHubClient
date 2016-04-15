@@ -1,4 +1,3 @@
-
 package com.gmail.sanovikov71.githubclient.ui.detail;
 
 import android.content.Context;
@@ -28,7 +27,7 @@ public class ReposListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void updateDataset(List<Repo> data) {
         mReposData = data;
         notifyDataSetChanged();
-        Log.i(TAG, "mReposData.size(): " + mReposData.size());
+        Log.i(TAG, "updateDataset mReposData.size(): " + mReposData.size());
     }
 
     @Override
@@ -43,7 +42,8 @@ public class ReposListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         ViewHolder typedHolder = (ViewHolder) holder;
 
         Repo repo = mReposData.get(position);
-        typedHolder.mRepoName.setText(repo.getName());
+        typedHolder.mRepoName.setText(repo.getFullName());
+        typedHolder.mRepoSize.setText(String.valueOf(repo.getSize()));
     }
 
     @Override
@@ -58,12 +58,13 @@ public class ReposListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        int mUserId;
         TextView mRepoName;
+        TextView mRepoSize;
 
         public ViewHolder(View view) {
             super(view);
             mRepoName = (TextView) view.findViewById(R.id.item_repo_name);
+            mRepoSize = (TextView) view.findViewById(R.id.item_repo_size);
         }
     }
 

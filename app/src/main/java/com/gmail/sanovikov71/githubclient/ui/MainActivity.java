@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity
         SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor>,
         ScrollingUi, OnUserListClickListener, SearchStateListener, ServerSearchListener {
 
-    public static final String TAG = "Novikov";
+    public static final String TAG = "MainActivity";
     private static final String TAG_RECENTS_FRAGMENT = "TAG_RECENTS_FRAGMENT";
 
     private FrameLayout mRecentContainer;
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = UserEntry.COLUMN_ID + " ASC";
+        String sortOrder = UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_GITHUB_ID + " ASC";
         Uri cardUri = UserEntry.CONTENT_URI;
         return new CursorLoader(this, cardUri, DBConstants.USER_COLUMNS, null, null, sortOrder);
     }
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity
         if (data != null && data.moveToFirst()) {
             do {
                 int id =
-                        data.getInt(data.getColumnIndex(UserEntry.COLUMN_ID));
+                        data.getInt(data.getColumnIndex(UserEntry.COLUMN_GITHUB_ID));
                 String login =
                         data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
                 String avatarUrl = data.getString(
@@ -130,7 +130,6 @@ public class MainActivity extends AppCompatActivity
             } while (data.moveToNext());
         }
         mNumberOfLoadedEntries = users.size();
-        Log.i(TAG, "mNumberOfLoadedEntries: " + mNumberOfLoadedEntries);
         mGithubUserAdapter.updateDataset(users);
     }
 
@@ -182,7 +181,7 @@ public class MainActivity extends AppCompatActivity
     public void onClickUser(int userId) {
         updateRecentsStorage(userId);
         Intent intent = new Intent(this, DetailActivity.class);
-//        intent.putExtra(CardDetailActivity.EXTRA_CARD_ID, id);
+        intent.putExtra(DetailActivity.EXTRA_USER_ID, userId);
         startActivity(intent);
     }
 

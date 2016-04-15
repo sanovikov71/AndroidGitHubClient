@@ -1,11 +1,16 @@
 
 package com.gmail.sanovikov71.githubclient.storage;
 
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.AUTHORITY;
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.PATH_REPOS;
+import static com.gmail.sanovikov71.githubclient.storage.GithubDataContract.PATH_USERS;
+
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -19,20 +24,22 @@ public class GithubDataLocalStorage extends ContentProvider {
 
     public static final String TAG = GithubDataLocalStorage.class.getSimpleName();
 
-    private static final int USER_LIST = 1;
-    private static final int USER_ID = 2;
-    private static final int REPO_LIST = 3;
-    private static final int REPO_ID = 4;
+    private static final int USER_LIST = 100;
+    private static final int USER_ID = 101;
+    private static final int USER_WITH_REPOS = 102;
+    private static final int REPO_LIST = 200;
+    private static final int REPO_ID = 201;
     private static final UriMatcher URI_MATCHER;
 
     private GithubDataHelper mHelper;
 
     static {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_USERS, USER_LIST);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_USERS + "/#", USER_ID);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_REPOS, REPO_LIST);
-        URI_MATCHER.addURI(GithubDataContract.AUTHORITY, GithubDataContract.PATH_REPOS + "/#", REPO_ID);
+        URI_MATCHER.addURI(AUTHORITY, PATH_USERS, USER_LIST);
+        URI_MATCHER.addURI(AUTHORITY, PATH_USERS + "/#", USER_ID);
+        URI_MATCHER.addURI(AUTHORITY, PATH_USERS + "/#/*", USER_WITH_REPOS);
+        URI_MATCHER.addURI(AUTHORITY, PATH_REPOS, REPO_LIST);
+        URI_MATCHER.addURI(AUTHORITY, PATH_REPOS + "/#", REPO_ID);
     }
 
     @Override
@@ -57,33 +64,48 @@ public class GithubDataLocalStorage extends ContentProvider {
         }
     }
 
+    private static final String sUserTables = UserEntry.TABLE_NAME;
+
+    private static final String sRepoTables = RepoEntry.TABLE_NAME;
+
+    private static final String sUserInnerJoinRepoTables = UserEntry.TABLE_NAME + " INNER JOIN " +
+            RepoEntry.TABLE_NAME +
+            " ON " + UserEntry.TABLE_NAME +
+            "." + UserEntry.COLUMN_GITHUB_ID +
+            " = " + RepoEntry.TABLE_NAME +
+            "." + RepoEntry.COLUMN_OWNER_ID;
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
 
-        Log.i(TAG, "path: " + uri.getPathSegments());
-
         SQLiteDatabase db = mHelper.getWritableDatabase();
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+
         String rowID = null;
+
+//        Log.i(TAG, "query for path: " + uri.getPathSegments() + " with uri: " + URI_MATCHER.match(uri));
 
         switch (URI_MATCHER.match(uri)) {
             case USER_ID:
                 rowID = uri.getPathSegments().get(1);
-                queryBuilder.appendWhere(UserEntry.COLUMN_ID + " = " + rowID);
-                queryBuilder.setTables(UserEntry.TABLE_NAME);
+                queryBuilder.setTables(sUserTables);
+                queryBuilder.appendWhere(UserEntry.COLUMN_GITHUB_ID + " = " + rowID);
                 break;
             case USER_LIST:
-                queryBuilder.setTables(UserEntry.TABLE_NAME);
+                queryBuilder.setTables(sUserTables);
+                break;
+            case USER_WITH_REPOS:
+                queryBuilder.setTables(sUserInnerJoinRepoTables);
                 break;
             case REPO_ID:
+                queryBuilder.setTables(sRepoTables);
                 rowID = uri.getPathSegments().get(1);
-                queryBuilder.appendWhere(RepoEntry.COLUMN_ID + " = " + rowID);
-                queryBuilder.setTables(RepoEntry.TABLE_NAME);
+                queryBuilder.appendWhere(RepoEntry.COLUMN_GITHUB_ID + " = " + rowID);
                 break;
             case REPO_LIST:
-                queryBuilder.setTables(RepoEntry.TABLE_NAME);
+                queryBuilder.setTables(sRepoTables);
                 break;
             default:
                 break;
@@ -92,10 +114,11 @@ public class GithubDataLocalStorage extends ContentProvider {
         Cursor cursor = queryBuilder
                 .query(db, projection, selection, selectionArgs, null, null, sortOrder);
 
+//        Log.i(TAG, "cursor for path: " + uri.getPathSegments() + " with uri: " + URI_MATCHER.match(uri));
+//        DatabaseUtils.dumpCursor(cursor);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
-
     }
 
     @Override
@@ -105,18 +128,15 @@ public class GithubDataLocalStorage extends ContentProvider {
         long id = -1;
         Uri insertedId = null;
 
-        Log.i(TAG, "provider insert");
-        Log.i(TAG, "uri: " + uri);
+//        Log.i(TAG, "insert with uri: " + URI_MATCHER.match(uri));
 
         switch (URI_MATCHER.match(uri)) {
             case USER_LIST:
-                Log.i(TAG, "provider insert USER_ID");
                 id = db.insert(UserEntry.TABLE_NAME, null, values);
                 insertedId = ContentUris.withAppendedId(UserEntry.CONTENT_URI, id);
                 break;
             case REPO_LIST:
-                Log.i(TAG, "provider insert REPO_ID");
-                id = db.insert(RepoEntry.TABLE_NAME, null, values);
+                id = db.insertWithOnConflict(RepoEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 insertedId = ContentUris.withAppendedId(RepoEntry.CONTENT_URI, id);
                 break;
             default:
@@ -139,7 +159,7 @@ public class GithubDataLocalStorage extends ContentProvider {
         switch (URI_MATCHER.match(uri)) {
             case USER_ID:
                 String rowID = uri.getPathSegments().get(1);
-                selection = GithubDataContract.UserEntry.COLUMN_ID + " = " + rowID +
+                selection = UserEntry.COLUMN_GITHUB_ID + " = " + rowID +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : "");
                 break;
             default:
@@ -150,7 +170,7 @@ public class GithubDataLocalStorage extends ContentProvider {
             selection = "1";
         }
 
-        int deleteCount = db.delete(GithubDataContract.UserEntry.TABLE_NAME, selection, selectionArgs);
+        int deleteCount = db.delete(UserEntry.TABLE_NAME, selection, selectionArgs);
 
         getContext().getContentResolver().notifyChange(uri, null);
 

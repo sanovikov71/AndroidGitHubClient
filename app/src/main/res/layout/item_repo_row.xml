@@ -4,22 +4,21 @@
                 android:layout_height="96dp">
 
     <TextView
-        android:text="lol"
         android:id="@+id/item_repo_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:gravity="center"/>
+        android:background="@android:color/holo_red_dark"/>
 
     <TextView
+        android:id="@+id/item_repo_size"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_toEndOf="@+id/item_repo_name"
         android:layout_toRightOf="@+id/item_repo_name"
-        android:gravity="center"
-        android:text="Some info"/>
+        android:gravity="center_vertical"/>
 
 </RelativeLayout>

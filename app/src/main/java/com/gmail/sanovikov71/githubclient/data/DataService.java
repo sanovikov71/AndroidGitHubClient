@@ -27,7 +27,7 @@ import java.util.List;
 public class DataService extends Service {
 
     private static final String API_URL = "https://api.github.com/";
-    private static final String TAG = "Novikov";
+    private static final String TAG = "DataService";
 
     private RetrofitService mGithub;
 
@@ -56,12 +56,12 @@ public class DataService extends Service {
     }
 
     public void fetchMoreUsers(final UiElement ui, int offset) {
-        Log.i("Novikov", "fetchMoreUsers with offset: " + offset);
+        Log.i(TAG, "fetchMoreUsers with offset: " + offset);
         fetch(ui, offset);
     }
 
     public void fetch(final UiElement ui, int since) {
-        Log.i("Novikov", "fetch");
+        Log.i(TAG, "fetch");
         mGithub.fetchUsers(since).enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
@@ -74,6 +74,7 @@ public class DataService extends Service {
                     for (int i = 0; i < size; i++) {
                         ContentValues userValues = new ContentValues();
                         final User user = body.get(i);
+                        userValues.put(UserEntry.COLUMN_GITHUB_ID, user.getId());
                         userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
                         userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
                         userList[i] = userValues;
@@ -81,6 +82,7 @@ public class DataService extends Service {
 
                     getContentResolver()
                             .bulkInsert(UserEntry.CONTENT_URI, userList);
+
                 } else {
                     ui.showError(response.code());
                 }
@@ -101,6 +103,7 @@ public class DataService extends Service {
                 final User user = response.body();
                 if (response.isSuccessful()) {
                     ContentValues userValues = new ContentValues();
+                    userValues.put(UserEntry.COLUMN_GITHUB_ID, user.getId());
                     userValues.put(UserEntry.COLUMN_LOGIN, user.getLogin());
                     userValues.put(UserEntry.COLUMN_AVATAR_URL, user.getAvatarUrl());
 
@@ -140,13 +143,17 @@ public class DataService extends Service {
                     for (int i = 0; i < size; i++) {
                         ContentValues repoValues = new ContentValues();
                         final Repo repo = body.get(i);
-                        repoValues.put(RepoEntry.COLUMN_NAME, repo.getName());
+                        repoValues.put(RepoEntry.COLUMN_GITHUB_ID, repo.getId());
+                        repoValues.put(RepoEntry.COLUMN_OWNER_ID, repo.getOwner().getId());
+                        repoValues.put(RepoEntry.COLUMN_NAME, repo.getFullName());
                         repoValues.put(RepoEntry.COLUMN_SIZE, repo.getSize());
                         reposList[i] = repoValues;
                     }
 
                     getContentResolver()
                             .bulkInsert(RepoEntry.CONTENT_URI, reposList);
+
+                    ui.hideProgressDialog();
                 } else {
                     ui.showError(response.code());
                 }

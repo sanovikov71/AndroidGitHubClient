@@ -92,9 +92,8 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = GithubDataContract.UserEntry.COLUMN_ID + " ASC";
         Uri uri = GithubDataContract.UserEntry.CONTENT_URI;
-        return new CursorLoader(getActivity(), uri, DBConstants.USER_COLUMNS, null, null, sortOrder);
+        return new CursorLoader(getActivity(), uri, DBConstants.USER_COLUMNS, null, null, null);
     }
 
     @Override
@@ -103,7 +102,7 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
         for (int i = 0; i < mRecentIds.size(); i++) {
             if (data != null && data.moveToFirst()) {
                 do {
-                    int id = data.getInt(data.getColumnIndex(UserEntry.COLUMN_ID));
+                    int id = data.getInt(data.getColumnIndex(UserEntry.COLUMN_GITHUB_ID));
                     // TODO: дичь какая-то
                     if (mRecentIds.get(i).equals(String.valueOf(id))) {
                         String login =
@@ -113,7 +112,6 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
                 } while (data.moveToNext());
             }
         }
-        Log.i(TAG, "updateDataset: " + logins.size());
         if (mRecentsAdapter != null) {
             mRecentsAdapter.updateDataset(logins);
         }

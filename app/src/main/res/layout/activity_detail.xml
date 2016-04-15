@@ -6,7 +6,8 @@
     <TextView
         android:id="@+id/detail_user_login"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="64dp"
+        android:background="@android:color/holo_blue_dark"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/detail_repos_list"

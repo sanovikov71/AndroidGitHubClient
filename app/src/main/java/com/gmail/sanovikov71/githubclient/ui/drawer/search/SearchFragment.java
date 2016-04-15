@@ -19,7 +19,7 @@ import android.view.ViewGroup;
 
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
-import com.gmail.sanovikov71.githubclient.storage.GithubDataContract;
+import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,10 +93,9 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = GithubDataContract.UserEntry.COLUMN_ID + " ASC";
-        Uri uri = GithubDataContract.UserEntry.CONTENT_URI;
+        String sortOrder = UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_GITHUB_ID + " ASC";
+        Uri uri = UserEntry.CONTENT_URI;
         return new CursorLoader(getActivity(), uri, DBConstants.USER_COLUMNS, null, null, sortOrder);
-
     }
 
     @Override
@@ -105,7 +104,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         if (data != null && data.moveToFirst()) {
             do {
                 String login =
-                        data.getString(data.getColumnIndex(GithubDataContract.UserEntry.COLUMN_LOGIN));
+                        data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
                 if (mSearchQuery != null && mSearchQuery.equals(login)) {
                     logins.add(login);
                 }

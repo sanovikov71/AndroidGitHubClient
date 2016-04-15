@@ -24,10 +24,17 @@ public class GithubDataContract {
         public static final String TABLE_NAME = "users";
 
         // Table columns
-        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_GITHUB_ID = "github_id";
         public static final String COLUMN_LOGIN = "login";
         public static final String COLUMN_AVATAR_URL = "avatar_url";
 
+        public static Uri buildUserUri(int id) {
+            return Uri.withAppendedPath(CONTENT_URI, String.valueOf(id));
+        }
+
+        public static Uri buildUserRepoUri() {
+            return Uri.withAppendedPath(CONTENT_URI, "1/1");
+        }
     }
 
     public static final String PATH_REPOS = "repos";
@@ -46,7 +53,8 @@ public class GithubDataContract {
         public static final String TABLE_NAME = "repos";
 
         // Table columns
-        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_GITHUB_ID = "github_id";
+        public static final String COLUMN_OWNER_ID = "owner_id";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_SIZE = "size";
 
