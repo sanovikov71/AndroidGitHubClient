@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.gmail.sanovikov71.githubclient.R;
+import com.gmail.sanovikov71.githubclient.model.User;
 import com.gmail.sanovikov71.githubclient.storage.DBConstants;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract;
 import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
@@ -29,7 +30,7 @@ import java.util.List;
 
 public class RecentsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = "Novikov";
+    private static final String TAG = "RecentsFragment";
 
     private List<String> mRecentIds = new ArrayList<>();
     private RecentListAdapter mRecentsAdapter;
@@ -98,7 +99,7 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        List<String> logins = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         for (int i = 0; i < mRecentIds.size(); i++) {
             if (data != null && data.moveToFirst()) {
                 do {
@@ -107,13 +108,15 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
                     if (mRecentIds.get(i).equals(String.valueOf(id))) {
                         String login =
                                 data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
-                        logins.add(login);
+                        String avatarUrl =
+                                data.getString(data.getColumnIndex(UserEntry.COLUMN_AVATAR_URL));
+                        users.add(new User(id, login, avatarUrl));
                     }
                 } while (data.moveToNext());
             }
         }
         if (mRecentsAdapter != null) {
-            mRecentsAdapter.updateDataset(logins);
+            mRecentsAdapter.updateDataset(users);
         }
     }
 

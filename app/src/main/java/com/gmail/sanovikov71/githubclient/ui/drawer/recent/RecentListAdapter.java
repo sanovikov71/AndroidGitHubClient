@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.gmail.sanovikov71.githubclient.R;
+import com.gmail.sanovikov71.githubclient.model.User;
+import com.gmail.sanovikov71.githubclient.ui.OnUserListClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +18,13 @@ import java.util.List;
 class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
-    private List<String> mLogins = new ArrayList<>();
+    private List<User> mLogins = new ArrayList<>();
 
     public RecentListAdapter(Context context) {
         mContext = context;
     }
 
-    public void updateDataset(List<String> data) {
+    public void updateDataset(List<User> data) {
         mLogins = data;
         notifyDataSetChanged();
     }
@@ -31,14 +33,16 @@ class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_recent, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(mContext, view);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ViewHolder typedHolder = (ViewHolder) holder;
 
-        typedHolder.mName.setText(mLogins.get(position));
+        User user = mLogins.get(position);
+        typedHolder.mUserId = user.getId();
+        typedHolder.mName.setText(user.getLogin());
     }
 
     @Override
@@ -54,10 +58,27 @@ class RecentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView mName;
+        private int mUserId;
 
-        public ViewHolder(View view) {
+        public ViewHolder(Context context, View view) {
             super(view);
             mName = (TextView) view.findViewById(R.id.item_drawer_name);
+
+            final OnUserListClickListener listener;
+            try {
+                listener = (OnUserListClickListener) context;
+            } catch (ClassCastException cce) {
+                throw new ClassCastException(context.getClass().getSimpleName()
+                        + " must implement OnItemClickListener interface");
+            }
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onClickUser(mUserId);
+                }
+            });
+
         }
     }
 
