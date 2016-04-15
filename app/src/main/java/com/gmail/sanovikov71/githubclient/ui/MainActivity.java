@@ -35,7 +35,7 @@ import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 import com.gmail.sanovikov71.githubclient.ui.detail.DetailActivity;
 import com.gmail.sanovikov71.githubclient.ui.drawer.recent.RecentsFragment;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchFragment;
-import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchStateListener;
+import com.gmail.sanovikov71.githubclient.ui.drawer.search.SearchViewStateListener;
 import com.gmail.sanovikov71.githubclient.ui.drawer.search.ServerSearchListener;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements UiElement,
         SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor>,
-        ScrollingUi, OnUserListClickListener, SearchStateListener, ServerSearchListener {
+        ScrollingUi, OnUserListClickListener, SearchViewStateListener, ServerSearchListener {
 
     public static final String TAG = "MainActivity";
     private static final String TAG_RECENTS_FRAGMENT = "TAG_RECENTS_FRAGMENT";
@@ -158,9 +158,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void hideProgressDialog() {
         mRefreshView.setRefreshing(false);
-
-        ((SearchFragment) getSupportFragmentManager().findFragmentById(R.id.search_fragment))
-                .searchResultsLoaded();
     }
 
     @Override
@@ -233,6 +230,11 @@ public class MainActivity extends AppCompatActivity
         showRecentsFragment();
     }
 
+    @Override
+    public void onSearch(String query) {
+        mDataService.searchUsers(this, query);
+    }
+
     // TODO: transaction is actually unnecessary here
     private void showRecentsFragment() {
         getSupportFragmentManager()
@@ -251,13 +253,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSearch(String query) {
-        mDataService.searchUsers(this, query);
-    }
-
-    @Override
-    public void onSearchResult() {
-
+    public void onSearchResult(List<User> searchResult) {
+        ((SearchFragment) getSupportFragmentManager().findFragmentById(R.id.search_fragment))
+                .searchResultsLoaded(searchResult);
     }
 
     @Override

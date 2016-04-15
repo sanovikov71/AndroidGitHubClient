@@ -16,8 +16,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.data.DataService;
 import com.gmail.sanovikov71.githubclient.model.Repo;
@@ -39,6 +41,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private int mUserId;
     private String mUserName;
 
+    private ImageView mAvatar;
     private TextView mUserLogin;
     private ReposListAdapter mReposListAdapter;
     private static final String TAG = "DetailActivity";
@@ -51,6 +54,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mUserId = getIntent().getIntExtra(EXTRA_USER_ID, 0);
         Log.i(TAG, "mUserId: " + mUserId);
 
+        mAvatar = (ImageView) findViewById(R.id.detail_user_avatar);
         mUserLogin = (TextView) findViewById(R.id.detail_user_login);
 
         RecyclerView userReposList = (RecyclerView) findViewById(R.id.detail_repos_list);
@@ -93,6 +97,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 data.moveToFirst();
                 mUserName = data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
                 mUserLogin.setText(mUserName);
+                Glide.with(this)
+                        .load(data.getString(data.getColumnIndex(UserEntry.COLUMN_AVATAR_URL)))
+                        .into(mAvatar);
                 updateReposData();
                 break;
             case REPOS_LOADER_ID:
@@ -167,7 +174,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void hideProgressDialog() {
         Log.i(TAG, "hasta luego");
-//        getSupportLoaderManager().restartLoader(REPOS_LOADER_ID, null, this);
+        //        getSupportLoaderManager().restartLoader(REPOS_LOADER_ID, null, this);
         getSupportLoaderManager().getLoader(REPOS_LOADER_ID).forceLoad();
     }
 

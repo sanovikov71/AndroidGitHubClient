@@ -139,7 +139,7 @@ public class DataService extends Service {
         });
     }
 
-    public void searchUsers(final UiElement ui, String userToFind) {
+    public void searchUsers(final ServerSearchListener serverSearchListener, String userToFind) {
         Log.i(TAG, "searchUsers");
         mGithub.searchUsers(userToFind).enqueue(new Callback<UserSearchResult>() {
             @Override
@@ -147,8 +147,6 @@ public class DataService extends Service {
 
                 Log.i(TAG, "url: " + call.request().url().toString());
 
-                // TODO: remove ui.hideProgressDialog()
-                ui.hideProgressDialog();
                 final UserSearchResult body = response.body();
 
                 if (response.isSuccessful()) {
@@ -167,9 +165,9 @@ public class DataService extends Service {
                     getContentResolver()
                             .bulkInsert(UserEntry.CONTENT_URI, userList);
 
-                    ui.hideProgressDialog();
+                    serverSearchListener.onSearchResult(users);
                 } else {
-                    ui.showError(response.code());
+                    serverSearchListener.onSearchError(response.code());
                 }
             }
 
@@ -179,8 +177,7 @@ public class DataService extends Service {
                 Log.i(TAG, "url: " + call.request().url().toString());
                 Log.i(TAG, "throwable: " + t.toString());
 
-                ui.hideProgressDialog();
-                ui.showError(-1);
+                serverSearchListener.onSearchError(-1);
             }
         });
     }

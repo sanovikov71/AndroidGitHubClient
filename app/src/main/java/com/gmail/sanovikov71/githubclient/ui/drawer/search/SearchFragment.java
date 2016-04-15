@@ -2,57 +2,36 @@
 package com.gmail.sanovikov71.githubclient.ui.drawer.search;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.gmail.sanovikov71.githubclient.R;
 import com.gmail.sanovikov71.githubclient.model.User;
-import com.gmail.sanovikov71.githubclient.storage.DBConstants;
-import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-
-    public static final String TAG = "SearchFragment";
-
-    private static final int SEARCH_RESULT_LOADER_ID = 1;
+public class SearchFragment extends Fragment {
 
     private SearchResultAdapter mSearchResultsAdapter;
-    private SearchStateListener mSearchListener;
-
-    //    private String mSearchQuery;
+    private SearchViewStateListener mSearchListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         try {
-            mSearchListener = (SearchStateListener) context;
+            mSearchListener = (SearchViewStateListener) context;
         } catch (ClassCastException cce) {
             throw new ClassCastException("MainActivity must implement SearchStateListener interface");
         }
 
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(SEARCH_RESULT_LOADER_ID, null, this);
     }
 
     @Nullable
@@ -85,7 +64,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //                mSearchQuery = query;
                 mSearchListener.onSearch(query);
                 return false;
             }
@@ -99,42 +77,8 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         return view;
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_GITHUB_ID + " ASC";
-        Uri uri = UserEntry.CONTENT_URI;
-        return new CursorLoader(getActivity(), uri, DBConstants.USER_COLUMNS, null, null, sortOrder);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.i(TAG, "onLoadFinished search: " + data.getCount());
-        List<User> users = new ArrayList<>();
-        if (data != null && data.moveToFirst()) {
-            do {
-                int id =
-                        data.getInt(data.getColumnIndex(UserEntry.COLUMN_GITHUB_ID));
-                String login =
-                        data.getString(data.getColumnIndex(UserEntry.COLUMN_LOGIN));
-                String avatarUrl =
-                        data.getString(data.getColumnIndex(UserEntry.COLUMN_AVATAR_URL));
-                User user = new User(id, login, avatarUrl);
-                users.add(user);
-            } while (data.moveToNext());
-        }
-        if (mSearchResultsAdapter != null) {
-            mSearchResultsAdapter.updateDataset(users);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    public void searchResultsLoaded() {
-        Log.i(TAG, "searchResultsLoaded");
-        getLoaderManager().getLoader(SEARCH_RESULT_LOADER_ID).forceLoad();
+    public void searchResultsLoaded(List<User> searchResult) {
+        mSearchResultsAdapter.updateDataset(searchResult);
     }
 
 }

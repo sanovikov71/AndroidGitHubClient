@@ -8,4 +8,11 @@
     <string name="user_avatar">User avatar</string>
 
     <string name="fix_me">Fix me</string>
+
+    <string name="recents">History:</string>
+    <string name="search">Search:</string>
+
+    <string name="user">User:</string>
+    <string name="repos_list">Repos list:</string>
+    <string name="kb">kb</string>
 </resources>

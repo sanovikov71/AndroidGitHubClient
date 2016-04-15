@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="96dp">
+                android:layout_height="72dp">
 
     <TextView
         android:id="@+id/item_repo_name"
@@ -9,16 +9,28 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@android:color/holo_red_dark"/>
+        android:gravity="center_vertical"
+        android:paddingEnd="@dimen/detail_padding"
+        android:paddingLeft="@dimen/detail_padding"
+        android:paddingRight="@dimen/detail_padding"
+        android:paddingStart="@dimen/detail_padding"/>
 
     <TextView
         android:id="@+id/item_repo_size"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_toEndOf="@+id/item_repo_name"
         android:layout_toRightOf="@+id/item_repo_name"
         android:gravity="center_vertical"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_toEndOf="@+id/item_repo_size"
+        android:layout_toRightOf="@+id/item_repo_size"
+        android:gravity="center_vertical"
+        android:text="@string/kb"/>
 
 </RelativeLayout>

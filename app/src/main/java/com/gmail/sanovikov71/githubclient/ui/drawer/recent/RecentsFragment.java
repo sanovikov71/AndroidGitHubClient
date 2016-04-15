@@ -30,7 +30,7 @@ import java.util.List;
 
 public class RecentsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = "RecentsFragment";
+    public static final int RECENTS_LOADER_ID = 300;
 
     private List<String> mRecentIds = new ArrayList<>();
     private RecentListAdapter mRecentsAdapter;
@@ -41,7 +41,7 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().getSupportLoaderManager().initLoader(300, null, this);
+        getActivity().getSupportLoaderManager().initLoader(RECENTS_LOADER_ID, null, this);
 
         SharedPreferences recents = getActivity()
                 .getSharedPreferences(RECENT_LIST_PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -88,7 +88,7 @@ public class RecentsFragment extends Fragment implements LoaderManager.LoaderCal
 
     private void reloadRecents(SharedPreferences recents) {
         mRecentIds = getRecentUsers(recents.getString(KEY_RECENTS, ""));
-        getActivity().getSupportLoaderManager().getLoader(300).forceLoad();
+        getActivity().getSupportLoaderManager().getLoader(RECENTS_LOADER_ID).forceLoad();
     }
 
     @Override

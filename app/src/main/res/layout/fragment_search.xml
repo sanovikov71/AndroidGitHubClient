@@ -2,8 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@android:color/holo_green_dark"
               android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/search_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:text="@string/search"/>
 
     <android.support.v7.widget.SearchView
         android:id="@+id/search_view"

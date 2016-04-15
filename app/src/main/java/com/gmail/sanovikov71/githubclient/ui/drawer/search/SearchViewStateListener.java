@@ -1,6 +1,6 @@
 package com.gmail.sanovikov71.githubclient.ui.drawer.search;
 
-public interface SearchStateListener {
+public interface SearchViewStateListener {
 
     void onSearchResultShown();
 
