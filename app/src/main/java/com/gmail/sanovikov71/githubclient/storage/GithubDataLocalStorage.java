@@ -19,11 +19,8 @@ import com.gmail.sanovikov71.githubclient.storage.GithubDataContract.UserEntry;
 
 public class GithubDataLocalStorage extends ContentProvider {
 
-    public static final String TAG = GithubDataLocalStorage.class.getSimpleName();
-
     private static final int USER_LIST = 100;
     private static final int USER_ID = 101;
-    private static final int USER_WITH_REPOS = 102;
     private static final int REPO_LIST = 200;
     private static final int REPO_ID = 201;
     private static final UriMatcher URI_MATCHER;
@@ -34,7 +31,6 @@ public class GithubDataLocalStorage extends ContentProvider {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         URI_MATCHER.addURI(AUTHORITY, PATH_USERS, USER_LIST);
         URI_MATCHER.addURI(AUTHORITY, PATH_USERS + "/#", USER_ID);
-        URI_MATCHER.addURI(AUTHORITY, PATH_USERS + "/#/*", USER_WITH_REPOS);
         URI_MATCHER.addURI(AUTHORITY, PATH_REPOS, REPO_LIST);
         URI_MATCHER.addURI(AUTHORITY, PATH_REPOS + "/#", REPO_ID);
     }
@@ -65,13 +61,6 @@ public class GithubDataLocalStorage extends ContentProvider {
 
     private static final String sRepoTables = RepoEntry.TABLE_NAME;
 
-    private static final String sUserInnerJoinRepoTables = UserEntry.TABLE_NAME + " INNER JOIN " +
-            RepoEntry.TABLE_NAME +
-            " ON " + UserEntry.TABLE_NAME +
-            "." + UserEntry.COLUMN_GITHUB_ID +
-            " = " + RepoEntry.TABLE_NAME +
-            "." + RepoEntry.COLUMN_OWNER_ID;
-
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
@@ -90,9 +79,6 @@ public class GithubDataLocalStorage extends ContentProvider {
                 break;
             case USER_LIST:
                 queryBuilder.setTables(sUserTables);
-                break;
-            case USER_WITH_REPOS:
-                queryBuilder.setTables(sUserInnerJoinRepoTables);
                 break;
             case REPO_ID:
                 queryBuilder.setTables(sRepoTables);

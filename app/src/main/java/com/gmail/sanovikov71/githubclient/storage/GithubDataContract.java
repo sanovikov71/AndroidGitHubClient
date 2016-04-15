@@ -32,9 +32,6 @@ public class GithubDataContract {
             return Uri.withAppendedPath(CONTENT_URI, String.valueOf(id));
         }
 
-        public static Uri buildUserRepoUri() {
-            return Uri.withAppendedPath(CONTENT_URI, "1/1");
-        }
     }
 
     public static final String PATH_REPOS = "repos";

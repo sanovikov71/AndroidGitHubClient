@@ -96,7 +96,6 @@ public class DetailActivity extends BoundActivity implements LoaderManager.Loade
                 return new CursorLoader(this, uri, DBConstants.USER_COLUMNS, null, null, sortOrder);
             case REPOS_LOADER_ID:
                 sortOrder = RepoEntry.TABLE_NAME + "." + RepoEntry.COLUMN_GITHUB_ID + " ASC";
-//                uri = UserEntry.buildUserRepoUri();
                 uri = RepoEntry.CONTENT_URI;
                 String selection = RepoEntry.COLUMN_OWNER_ID + " = " + mUserId;
                 return new CursorLoader(this, uri, DBConstants.REPO_COLUMNS, selection, null, sortOrder);
