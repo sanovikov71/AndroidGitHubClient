@@ -58,12 +58,10 @@ public class DataService extends Service {
     }
 
     public void fetchMoreUsers(final ProgressBarUiElement ui, int offset) {
-        Log.i(TAG, "fetchMoreUsers with offset: " + offset);
         fetch(ui, offset);
     }
 
     public void fetch(final ProgressBarUiElement ui, int since) {
-        Log.i(TAG, "fetch");
         mGithub.fetchUsers(since).enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
@@ -133,12 +131,9 @@ public class DataService extends Service {
     }
 
     public void searchUsers(final ServerSearchListener serverSearchListener, String userToFind) {
-        Log.i(TAG, "searchUsers");
         mGithub.searchUsers(userToFind).enqueue(new Callback<UserSearchResult>() {
             @Override
             public void onResponse(Call<UserSearchResult> call, Response<UserSearchResult> response) {
-
-                Log.i(TAG, "url: " + call.request().url().toString());
 
                 final UserSearchResult body = response.body();
 
@@ -166,10 +161,6 @@ public class DataService extends Service {
 
             @Override
             public void onFailure(Call<UserSearchResult> call, Throwable t) {
-
-                Log.i(TAG, "url: " + call.request().url().toString());
-                Log.i(TAG, "throwable: " + t.toString());
-
                 serverSearchListener.onSearchError(-1);
             }
         });

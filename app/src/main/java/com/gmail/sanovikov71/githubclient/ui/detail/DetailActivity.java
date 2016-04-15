@@ -51,7 +51,6 @@ public class DetailActivity extends BoundActivity implements LoaderManager.Loade
         setContentView(R.layout.activity_detail);
 
         mUserId = getIntent().getIntExtra(EXTRA_USER_ID, 0);
-        Log.i(TAG, "mUserId: " + mUserId);
 
         initServiceConnection();
 

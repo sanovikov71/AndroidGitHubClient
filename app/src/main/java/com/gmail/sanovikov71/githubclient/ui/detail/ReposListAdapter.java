@@ -27,7 +27,6 @@ public class ReposListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void updateDataset(List<Repo> data) {
         mReposData = data;
         notifyDataSetChanged();
-        Log.i(TAG, "updateDataset mReposData.size(): " + mReposData.size());
     }
 
     @Override
